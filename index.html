@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="مخزن المختبر">
+<meta name="theme-color" content="#2B3A5C">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='19' fill='%232B3A5C'/%3E%3Cpath d='M20 10v20M10 20h20' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%232B3A5C'/%3E%3Cpath d='M20 10v20M10 20h20' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>مخزن المختبر | تجمع حائل الصحي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF0EA; --panel:#FBFAF6; --ink:#1E2A2A; --ink-soft:#5A6666;
+    --line:rgba(30,42,42,0.14); --line-strong:rgba(30,42,42,0.28);
+    --brand:#2B3A5C; --orange:#B23A3A; --orange-bg:#FBEAEA;
+    --red:#B23A3A; --red-bg:#FBEAEA; --green:#3E8368;
+    --yellow:#B8930C; --yellow-bg:#FBF6DE;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans Arabic',sans-serif;line-height:1.55;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  button{font-family:inherit;cursor:pointer;}
+
+  header{padding:16px 20px 18px;border-bottom:1px solid var(--line-strong);background:rgba(255,255,255,.5);}
+  .hdr-inner{max-width:1140px;margin:0 auto;}
+  h1{font-size:20px;margin:0 0 14px;font-weight:700;color:var(--ink-soft);}
+
+  .logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .logo-badge{flex:none;width:38px;height:38px;border-radius:10px;background:var(--brand);display:flex;align-items:center;justify-content:center;}
+  .logo-text{line-height:1.3;}
+  .logo-org{font-size:16px;font-weight:700;color:var(--ink);}
+  .logo-sub{font-size:11px;color:var(--ink-soft);letter-spacing:.2px;}
+  .share-btn{margin-inline-start:auto;font-size:11.5px;font-weight:600;color:#fff;background:var(--green);border:none;border-radius:20px;padding:6px 14px;flex:none;display:flex;align-items:center;gap:5px;}
+  .share-btn:hover{opacity:.9;}
+
+  .dept-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;-webkit-overflow-scrolling:touch;}
+  .dept-chip{display:flex;align-items:center;gap:7px;white-space:nowrap;border:1px solid var(--line-strong);background:#fff;border-radius:20px;padding:7px 14px;font-size:13px;color:var(--ink-soft);flex:none;}
+  .dept-chip .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .dept-chip.active{background:var(--dept-color,var(--brand));color:#fff;border-color:var(--dept-color,var(--brand));}
+  .dept-chip.active .dot{background:#fff;}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px;}
+  .tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--line-strong);border-radius:8px;padding:3px;}
+  .tab{border:none;background:none;padding:8px 18px;border-radius:6px;font-size:14px;color:var(--ink-soft);font-weight:500;}
+  .tab.active{background:var(--brand);color:#fff;}
+  .search{flex:1;min-width:140px;}
+  .search input{width:100%;padding:9px 12px;border:1px solid var(--line-strong);border-radius:8px;font-family:inherit;font-size:14px;background:#fff;}
+  .btn-add{background:var(--brand);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;flex:none;white-space:nowrap;}
+  .btn-add:hover{opacity:.9;}
+
+  .alert-strip{max-width:1140px;margin:14px auto 0;padding:0 20px;position:relative;}
+  .alert-row{display:flex;gap:10px;align-items:stretch;}
+  .notif-wrap{position:relative;flex:1;}
+  .btn-notif{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;font-size:14px;font-weight:600;color:var(--ink);}
+  .notif-badge{background:var(--red);color:#fff;font-size:11px;padding:1px 8px;border-radius:20px;line-height:1.5;}
+  .notif-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;left:0;background:#fff;border:1px solid var(--line-strong);border-radius:8px;padding:12px 14px;max-height:380px;overflow-y:auto;z-index:40;box-shadow:0 8px 20px rgba(20,25,25,.12);}
+  .notif-panel.show{display:block;}
+  .notif-dept{margin-bottom:14px;}
+  .notif-dept:last-child{margin-bottom:0;}
+  .notif-dept-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+  .notif-dept-title .dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .notif-item-row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;padding:6px 0;border-top:1px solid var(--line);}
+  .notif-empty{font-size:13px;color:var(--ink-soft);text-align:center;padding:18px 0;}
+
+  main{max-width:1140px;margin:0 auto;padding:18px 20px 80px;}
+  #status-msg{font-size:12.5px;color:var(--ink-soft);min-height:18px;margin-bottom:6px;}
+  .current-dept-label{font-size:13px;color:var(--ink-soft);margin-bottom:10px;}
+  .current-dept-label b{color:var(--ink);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative;border-inline-start:4px solid var(--line-strong);}
+  .card.orange{border-inline-start-color:var(--orange);}
+  .card.expiry{border-inline-start-color:var(--yellow);}
+  .card-photo{width:100%;height:72px;background:#e4e4dc center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:10.5px;}
+  .card-body{padding:9px 10px 10px;}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;flex-wrap:wrap;}
+  .card-name{font-size:13.5px;font-weight:600;margin:0;}
+  .card-lot{font-size:10px;color:var(--ink-soft);margin-top:2px;}
+  .badge{font-size:10px;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+  .badge.orange{background:var(--orange-bg);color:var(--orange);}
+  .badge.expiry{background:var(--yellow-bg);color:var(--yellow);}
+  .card-exp{font-size:10.5px;color:var(--ink-soft);margin-top:6px;}
+  .qty-row{display:flex;align-items:center;gap:6px;margin-top:9px;}
+  .qty-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--line-strong);background:#fff;font-size:14px;line-height:1;}
+  .qty-val{flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;border:1px solid var(--line-strong);border-radius:6px;padding:4px 0;background:#fff;}
+  .card-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}
+  .icon-btn{background:none;border:none;color:var(--ink-soft);font-size:11px;text-decoration:underline;padding:2px;}
+  .icon-btn.danger{color:var(--red);}
+
+  .empty{color:var(--ink-soft);font-size:14px;padding:40px 0;text-align:center;}
+
+  .overlay{position:fixed;inset:0;background:rgba(20,25,25,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:10px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;padding:22px;}
+  .modal h2{font-size:18px;margin:0 0 16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:5px;}
+  .field input, .field select{width:100%;padding:9px 10px;border:1px solid var(--line-strong);border-radius:6px;font-family:inherit;font-size:14px;background:#fff;}
+  .photo-input-row{display:flex;align-items:center;gap:12px;}
+  .photo-preview{width:64px;height:64px;border-radius:6px;background:#eee center/cover no-repeat;flex:none;border:1px solid var(--line-strong);}
+  .modal-actions{display:flex;gap:10px;margin-top:18px;}
+  .btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line-strong);background:#fff;font-size:14px;font-weight:600;}
+  .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .btn.ghost{color:var(--ink-soft);}
+
+  footer{max-width:1140px;margin:0 auto;padding:10px 20px 40px;text-align:center;}
+  .reset-link{font-size:11.5px;color:var(--ink-soft);text-decoration:underline;background:none;border:none;}
+
+  @media (max-width:600px){
+    .toolbar{flex-direction:column;align-items:stretch;}
+    .tabs{justify-content:center;}
+    .btn-notif, .btn-add{padding:9px 10px;font-size:13px;}
+    .logo-row{flex-wrap:wrap;}
+    .share-btn{margin-inline-start:0;flex:1 0 100%;justify-content:center;order:3;margin-top:4px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-inner">
+    <div class="logo-row">
+      <div class="logo-badge">
+        <svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M20 10v20M10 20h20" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-org">تجمع حائل الصحي</div>
+        <div class="logo-sub">نظام مخزون المختبر — نموذج تجريبي</div>
+      </div>
+      <button class="share-btn" id="shareBtn">🔗 نسخ رابط المشاركة</button>
+    </div>
+    <h1>مخزن المختبر</h1>
+    <div class="dept-row" id="deptRow"></div>
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="tab active" data-type="reagents">محاليل (Reagents)</button>
+        <button class="tab" data-type="equipment">أدوات (Equipment)</button>
+      </div>
+      <div class="search"><input id="searchInput" type="text" placeholder="بحث بالاسم أو رقم اللوت..."></div>
+    </div>
+  </div>
+</header>
+
+<div class="alert-strip">
+  <div class="alert-row">
+    <div class="notif-wrap">
+      <button class="btn-notif" id="notifBtn">🔔 تنبيهات<span class="notif-badge" id="notifBadge" style="display:none">0</span></button>
+      <div class="notif-panel" id="notifPanel"></div>
+    </div>
+    <button class="btn-add" id="openAdd">+ إضافة غرض</button>
+  </div>
+</div>
+
+<main>
+  <div id="status-msg"></div>
+  <div class="current-dept-label" id="deptLabel"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  <button class="reset-link" id="resetBtn">مسح كل بيانات المخزن</button>
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">إضافة غرض جديد</h2>
+    <div class="field">
+      <label>صورة الغرض</label>
+      <div class="photo-input-row">
+        <div class="photo-preview" id="photoPreview"></div>
+        <input type="file" accept="image/*" capture="environment" id="photoInput">
+      </div>
+    </div>
+    <div class="field">
+      <label>القسم</label>
+      <select id="fDept"></select>
+    </div>
+    <div class="field">
+      <label>النوع</label>
+      <select id="fType">
+        <option value="reagents">محاليل (Reagents)</option>
+        <option value="equipment">أدوات (Equipment)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>اسم الغرض</label>
+      <input type="text" id="fName" placeholder="مثال: كاشف جلوكوز">
+    </div>
+    <div class="field">
+      <label>رقم اللوت (Lot Number)</label>
+      <input type="text" id="fLot" placeholder="مثال: LOT-2026-014">
+    </div>
+    <div class="field">
+      <label>الكمية الحالية</label>
+      <input type="number" id="fQty" min="0" value="0">
+    </div>
+    <div class="field">
+      <label>حد التنبيه (يصفر عند هذا العدد أو أقل)</label>
+      <input type="number" id="fThreshold" min="0" value="5">
+    </div>
+    <div class="field">
+      <label>تاريخ الانتهاء (اختياري)</label>
+      <input type="date" id="fExpiry">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="cancelBtn">إلغاء</button>
+      <button class="btn primary" id="saveBtn">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'inventory-data';
+let items = [];
+let activeDept = 'chemistry';
+let activeType = 'reagents';
+let editingId = null;
+let pendingPhoto = null;
+let confirmingDeleteId = null;
+
+const DEPARTMENTS = [
+  {id:'chemistry',    name:'Chemistry',      color:'#C99A2E'},
+  {id:'hormone',      name:'Hormone',        color:'#8B6BA8'},
+  {id:'bloodbank',    name:'Blood Bank',     color:'#D65C7D'},
+  {id:'virology',     name:'Virology',       color:'#A8353A'},
+  {id:'serology',     name:'Serology',       color:'#4A90A4'},
+  {id:'microbiology', name:'Microbiology',   color:'#3E8368'},
+  {id:'parasitology', name:'Parasitology',   color:'#8B5E3C'},
+];
+
+const grid = document.getElementById('grid');
+const statusMsg = document.getElementById('status-msg');
+const overlay = document.getElementById('overlay');
+const searchInput = document.getElementById('searchInput');
+const deptRow = document.getElementById('deptRow');
+const deptLabel = document.getElementById('deptLabel');
+
+function deptById(id){ return DEPARTMENTS.find(d=>d.id===id); }
+
+// بيانات مشتركة سحابيًا عبر jsonblob.com: كل من يفتح نفس الرابط (بنفس ?store=) يرى نفس المخزون
+// ويقدر يضيف/يعدّل. أول من يفتح الرابط الأساسي (بدون store) ينشئ مخزنًا جديدًا تلقائيًا،
+// ويتحدث الرابط في المتصفح بمعرّف المخزن — هذا الرابط الجديد هو الي ينرسل للباقين.
+const JSONBLOB_BASE = 'https://jsonblob.com/api/jsonBlob';
+let storeId = new URLSearchParams(location.search).get('store');
+let cloudReady = false;
+
+function setStatus(msg, isErr){
+  statusMsg.textContent = msg || '';
+  statusMsg.style.color = isErr ? 'var(--red)' : 'var(--ink-soft)';
+  if(msg) setTimeout(()=>{ if(statusMsg.textContent===msg) statusMsg.textContent=''; }, 3000);
+}
+
+async function ensureStore(){
+  if(storeId) return true;
+  try{
+    const res = await fetch(JSONBLOB_BASE, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({items:[]})
+    });
+    const loc = res.headers.get('Location');
+    if(!loc) throw new Error('no id returned');
+    storeId = loc.split('/').pop();
+    const url = new URL(location.href);
+    url.searchParams.set('store', storeId);
+    history.replaceState(null, '', url);
+    return true;
+  }catch(e){
+    setStatus('تعذّر إنشاء مخزن سحابي جديد — سيتم العمل محليًا فقط', true);
+    return false;
+  }
+}
+
+async function loadItems(){
+  setStatus('جارِ تحميل بيانات المخزن...');
+  const ok = await ensureStore();
+  cloudReady = ok;
+  if(ok){
+    try{
+      const res = await fetch(`${JSONBLOB_BASE}/${storeId}`);
+      if(!res.ok) throw new Error('fetch failed');
+      const data = await res.json();
+      items = Array.isArray(data.items) ? data.items : [];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      setStatus('');
+    }catch(e){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      items = raw ? JSON.parse(raw) : [];
+      setStatus('تعذّر الاتصال بالمخزن السحابي — تُعرض آخر نسخة محفوظة', true);
+    }
+  }else{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    items = raw ? JSON.parse(raw) : [];
+  }
+  render();
+  startPolling();
+}
+
+async function saveItems(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  if(!cloudReady) return;
+  try{
+    const res = await fetch(`${JSONBLOB_BASE}/${storeId}`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({items})
+    });
+    if(!res.ok) throw new Error('save failed');
+  }catch(e){
+    setStatus('تعذّر رفع التحديث للسحابة، حاول مرة أخرى', true);
+  }
+}
+
+let pollTimer = null;
+function startPolling(){
+  if(pollTimer || !cloudReady) return;
+  pollTimer = setInterval(async ()=>{
+    if(document.hidden || confirmingDeleteId) return;
+    try{
+      const res = await fetch(`${JSONBLOB_BASE}/${storeId}`);
+      if(!res.ok) return;
+      const data = await res.json();
+      const fresh = JSON.stringify(Array.isArray(data.items)?data.items:[]);
+      if(fresh !== JSON.stringify(items)){
+        items = JSON.parse(fresh);
+        localStorage.setItem(STORAGE_KEY, fresh);
+        render();
+      }
+    }catch(e){ /* transient — next tick retries */ }
+  }, 5000);
+}
+
+document.getElementById('shareBtn').addEventListener('click', async ()=>{
+  await ensureStore();
+  try{
+    await navigator.clipboard.writeText(location.href);
+    setStatus('تم نسخ رابط المشاركة ✓');
+  }catch(e){
+    setStatus(location.href);
+  }
+});
+
+function daysUntil(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
+  return Math.round((d-today)/(1000*60*60*24));
+}
+
+function getStatus(item){
+  if(item.expiry){
+    const dd = daysUntil(item.expiry);
+    if(dd < 0) return {level:'expiry', label:'منتهي الصلاحية'};
+    if(dd <= 14) return {level:'expiry', label:`ينتهي خلال ${dd} يوم`};
+  }
+  const th = item.threshold ?? 5;
+  if(item.quantity <= 0) return {level:'orange', label:'نفدت الكمية — اطلب الآن'};
+  if(item.quantity <= th) return {level:'orange', label:'الكمية منخفضة — يلزم الطلب'};
+  return {level:'normal', label:null};
+}
+
+function renderDeptRow(){
+  deptRow.innerHTML = DEPARTMENTS.map(d=>{
+    const count = items.filter(it=>it.department===d.id).length;
+    return `<button class="dept-chip ${d.id===activeDept?'active':''}" data-dept="${d.id}" style="--dept-color:${d.color}">
+      <span class="dot" style="background:${d.color}"></span>${d.name}${count?` (${count})`:''}
+    </button>`;
+  }).join('');
+  deptRow.querySelectorAll('.dept-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{ activeDept = chip.dataset.dept; render(); });
+  });
+}
+
+function render(){
+  renderDeptRow();
+  const dept = deptById(activeDept);
+  deptLabel.innerHTML = `قسم <b>${dept.name}</b> — ${activeType==='reagents' ? 'المحاليل' : 'الأدوات'}`;
+
+  const q = searchInput.value.trim().toLowerCase();
+  const filtered = items.filter(it =>
+    it.department === activeDept &&
+    it.type === activeType &&
+    (!q || it.name.toLowerCase().includes(q) || (it.lot||'').toLowerCase().includes(q))
+  );
+
+  renderNotifPanel();
+
+  if(filtered.length===0){
+    grid.innerHTML = `<div class="empty">لا توجد أغراض في هذا القسم بعد. اضغط "إضافة غرض" للبدء.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(it=>{
+    const s = getStatus(it);
+    return `
+    <div class="card ${s.level}" data-id="${it.id}">
+      <div class="card-photo" style="${it.photo ? `background-image:url('${it.photo}')` : ''}">${it.photo?'':'لا توجد صورة'}</div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <p class="card-name">${escapeHtml(it.name)}</p>
+            <div class="card-lot mono">${it.lot ? 'اللوت: '+escapeHtml(it.lot) : 'بدون رقم لوت'}</div>
+          </div>
+          ${s.label ? `<span class="badge ${s.level}">${s.label}</span>` : ''}
+        </div>
+        ${it.expiry ? `<div class="card-exp">تاريخ الانتهاء: ${it.expiry}</div>` : ''}
+        <div class="qty-row">
+          <button class="qty-btn" data-act="dec">−</button>
+          <div class="qty-val">${it.quantity}</div>
+          <button class="qty-btn" data-act="inc">+</button>
+        </div>
+        <div class="card-actions">
+          ${it.id===confirmingDeleteId
+            ? `<button class="icon-btn" data-act="cancel-del">إلغاء</button><button class="icon-btn danger" data-act="confirm-del">تأكيد الحذف</button>`
+            : `<button class="icon-btn" data-act="edit">تعديل</button><button class="icon-btn danger" data-act="del">حذف</button>`
+          }
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderNotifPanel(){
+  const panel = document.getElementById('notifPanel');
+  const badge = document.getElementById('notifBadge');
+  const dept = deptById(activeDept);
+  const deptAlerts = items
+    .filter(it=>it.department===activeDept)
+    .map(it=>({it, s:getStatus(it)}))
+    .filter(x=>x.s.level!=='normal');
+
+  const typeLabel = t => t==='reagents' ? 'محلول' : 'أداة';
+  panel.innerHTML = `
+    <div class="notif-dept">
+      <div class="notif-dept-title"><span class="dot" style="background:${dept.color}"></span>${dept.name}</div>
+      ${deptAlerts.length===0
+        ? `<div class="notif-empty">لا توجد تنبيهات في قسم ${dept.name} حاليًا</div>`
+        : deptAlerts.map(a=>`<div class="notif-item-row"><span>${escapeHtml(a.it.name)} <span style="color:var(--ink-soft)">(${typeLabel(a.it.type)})</span></span><span class="badge ${a.s.level}">${a.s.label}</span></div>`).join('')
+      }
+    </div>`;
+  if(deptAlerts.length>0){ badge.style.display='inline-block'; badge.textContent = deptAlerts.length; }
+  else{ badge.style.display='none'; }
+}
+
+document.getElementById('notifBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  document.getElementById('notifPanel').classList.toggle('show');
+});
+document.addEventListener('click', (e)=>{
+  const wrap = document.querySelector('.notif-wrap');
+  if(wrap && !wrap.contains(e.target)) document.getElementById('notifPanel').classList.remove('show');
+});
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+grid.addEventListener('click', async (e)=>{
+  const card = e.target.closest('.card');
+  if(!card) return;
+  const id = card.dataset.id;
+  const item = items.find(i=>i.id===id);
+  const act = e.target.dataset.act;
+  if(act==='inc'){ item.quantity++; render(); await saveItems(); }
+  else if(act==='dec'){ item.quantity = Math.max(0, item.quantity-1); render(); await saveItems(); }
+  else if(act==='del'){
+    confirmingDeleteId = id;
+    render();
+  } else if(act==='cancel-del'){
+    confirmingDeleteId = null;
+    render();
+  } else if(act==='confirm-del'){
+    items = items.filter(i=>i.id!==id);
+    confirmingDeleteId = null;
+    render();
+    await saveItems();
+  } else if(act==='edit'){
+    openModal(item);
+  }
+});
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    activeType = t.dataset.type;
+    render();
+  });
+});
+searchInput.addEventListener('input', render);
+
+document.getElementById('openAdd').addEventListener('click', ()=> openModal(null));
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+
+const fDeptSelect = document.getElementById('fDept');
+fDeptSelect.innerHTML = DEPARTMENTS.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+
+function openModal(item){
+  editingId = item ? item.id : null;
+  pendingPhoto = item ? item.photo : null;
+  document.getElementById('modalTitle').textContent = item ? 'تعديل الغرض' : 'إضافة غرض جديد';
+  document.getElementById('fDept').value = item ? item.department : activeDept;
+  document.getElementById('fType').value = item ? item.type : activeType;
+  document.getElementById('fName').value = item ? item.name : '';
+  document.getElementById('fLot').value = item ? item.lot : '';
+  document.getElementById('fQty').value = item ? item.quantity : 0;
+  document.getElementById('fThreshold').value = item ? (item.threshold ?? 5) : 5;
+  document.getElementById('fExpiry').value = item ? (item.expiry||'') : '';
+  const preview = document.getElementById('photoPreview');
+  preview.style.backgroundImage = pendingPhoto ? `url('${pendingPhoto}')` : '';
+  preview.style.backgroundSize = 'cover';
+  document.getElementById('photoInput').value = '';
+  overlay.classList.add('show');
+}
+function closeModal(){ overlay.classList.remove('show'); }
+
+document.getElementById('photoInput').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    pendingPhoto = await resizeImage(file);
+    const preview = document.getElementById('photoPreview');
+    preview.style.backgroundImage = `url('${pendingPhoto}')`;
+    preview.style.backgroundSize = 'cover';
+  }catch(err){
+    setStatus('تعذّر تحميل الصورة', true);
+  }
+});
+
+function resizeImage(file, maxDim=400){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w=img.width, h=img.height;
+        if(w>h && w>maxDim){ h=h*maxDim/w; w=maxDim; }
+        else if(h>maxDim){ w=w*maxDim/h; h=maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  const name = document.getElementById('fName').value.trim();
+  if(!name){ setStatus('اكتب اسم الغرض أولاً', true); return; }
+  const data = {
+    department: document.getElementById('fDept').value,
+    type: document.getElementById('fType').value,
+    name,
+    lot: document.getElementById('fLot').value.trim(),
+    quantity: parseInt(document.getElementById('fQty').value)||0,
+    threshold: parseInt(document.getElementById('fThreshold').value)||0,
+    expiry: document.getElementById('fExpiry').value || null,
+    photo: pendingPhoto
+  };
+  if(editingId){
+    const idx = items.findIndex(i=>i.id===editingId);
+    items[idx] = {...items[idx], ...data};
+  }else{
+    data.id = 'item_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+    items.push(data);
+  }
+  activeDept = data.department;
+  activeType = data.type;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.type===activeType));
+  closeModal();
+  render();
+  await saveItems();
+});
+
+let resetConfirming = false;
+document.getElementById('resetBtn').addEventListener('click', async (e)=>{
+  const btn = e.target;
+  if(!resetConfirming){
+    resetConfirming = true;
+    btn.textContent = 'اضغط مرة أخرى للتأكيد نهائيًا';
+    setTimeout(()=>{ resetConfirming = false; btn.textContent = 'مسح كل بيانات المخزن'; }, 4000);
+    return;
+  }
+  resetConfirming = false;
+  btn.textContent = 'مسح كل بيانات المخزن';
+  items = [];
+  render();
+  await saveItems();
+});
+
+loadItems();
+</script>
+</body>
+</html>

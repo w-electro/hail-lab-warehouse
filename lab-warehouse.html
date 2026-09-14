@@ -297,12 +297,44 @@ const headerEl = document.querySelector('header');
 
 function deptById(id){ return DEPARTMENTS.find(d=>d.id===id); }
 
-// بيانات مشتركة سحابيًا عبر restful-api.dev: كل من يفتح نفس الرابط (بنفس ?store=) يرى نفس المخزون
-// ويقدر يضيف/يعدّل. أول من يفتح الرابط الأساسي (بدون store) ينشئ مخزنًا جديدًا تلقائيًا،
-// ويتحدث الرابط في المتصفح بمعرّف المخزن — هذا الرابط الجديد هو الي ينرسل للباقين.
-const STORE_API = 'https://api.restful-api.dev/objects';
-let storeId = new URLSearchParams(location.search).get('store');
+// بيانات مشتركة سحابيًا عبر ملف data.json داخل مستودع GitHub نفسه:
+// - القراءة عامة للجميع (بدون توكن) عبر raw.githubusercontent.com.
+// - الإضافة/التعديل تتطلب توكن كتابة محدود بهذا المستودع فقط، يُمرَّر عبر #token= في الرابط
+//   ثم يُحفظ في localStorage على هذا الجهاز ويُزال من شريط العنوان. من يملك هذا التوكن
+//   يقدر يشارك الرابط (بالتوكن) مع غيره ليقدروا يضيفون هم أيضًا.
+const GH_OWNER = 'w-electro';
+const GH_REPO = 'hail-lab-warehouse';
+const GH_FILE = 'data.json';
+const RAW_URL = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_FILE}`;
+const API_URL = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
+
+let ghToken = null;
+let fileSha = null;
 let cloudReady = false;
+
+(function bootstrapToken(){
+  const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const fromLink = hash.get('token');
+  if(fromLink){
+    localStorage.setItem('gh_token', fromLink);
+    const url = new URL(location.href);
+    url.hash = '';
+    history.replaceState(null, '', url);
+  }
+  ghToken = localStorage.getItem('gh_token');
+})();
+
+function utf8ToBase64(str){
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+function base64ToUtf8(b64){
+  const binary = atob(b64.replace(/\n/g,''));
+  const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
 
 function setStatus(msg, isErr){
   statusMsg.textContent = msg || '';
@@ -316,48 +348,34 @@ function setStatus(msg, isErr){
   }, 3000);
 }
 
-async function ensureStore(){
-  if(storeId) return true;
-  try{
-    const res = await fetch(STORE_API, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name:'rulab-store', data:{items:[]}})
-    });
-    if(!res.ok) throw new Error('create failed');
-    const created = await res.json();
-    if(!created.id) throw new Error('no id returned');
-    storeId = created.id;
-    const url = new URL(location.href);
-    url.searchParams.set('store', storeId);
-    history.replaceState(null, '', url);
-    return true;
-  }catch(e){
-    setStatus('تعذّر إنشاء مخزن سحابي جديد — سيتم العمل محليًا فقط', true);
-    return false;
-  }
+async function fetchViaApi(){
+  const res = await fetch(API_URL, {
+    headers: ghToken ? {'Authorization':'Bearer '+ghToken, 'Accept':'application/vnd.github+json'} : {'Accept':'application/vnd.github+json'}
+  });
+  if(!res.ok) throw new Error('api fetch failed: '+res.status);
+  const json = await res.json();
+  fileSha = json.sha;
+  return JSON.parse(base64ToUtf8(json.content));
+}
+
+async function fetchViaRaw(){
+  const res = await fetch(`${RAW_URL}?t=${Date.now()}`);
+  if(!res.ok) throw new Error('raw fetch failed: '+res.status);
+  return await res.json();
 }
 
 async function loadItems(){
   setStatus('جارِ تحميل بيانات المخزن...');
-  const ok = await ensureStore();
-  cloudReady = ok;
-  if(ok){
-    try{
-      const res = await fetch(`${STORE_API}/${storeId}`);
-      if(!res.ok) throw new Error('fetch failed');
-      const obj = await res.json();
-      items = Array.isArray(obj.data?.items) ? obj.data.items : [];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-      setStatus('');
-    }catch(e){
-      const raw = localStorage.getItem(STORAGE_KEY);
-      items = raw ? JSON.parse(raw) : [];
-      setStatus('تعذّر الاتصال بالمخزن السحابي — تُعرض آخر نسخة محفوظة', true);
-    }
-  }else{
+  try{
+    const data = ghToken ? await fetchViaApi() : await fetchViaRaw();
+    items = Array.isArray(data.items) ? data.items : [];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    cloudReady = true;
+    setStatus(ghToken ? '' : 'وضع القراءة فقط — لا تملك صلاحية إضافة على هذا الجهاز', false);
+  }catch(e){
     const raw = localStorage.getItem(STORAGE_KEY);
     items = raw ? JSON.parse(raw) : [];
+    setStatus('تعذّر الاتصال بالمخزن السحابي — تُعرض آخر نسخة محفوظة', true);
   }
   render();
   startPolling();
@@ -365,14 +383,25 @@ async function loadItems(){
 
 async function saveItems(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  if(!cloudReady) return;
+  if(!ghToken) return;
   try{
-    const res = await fetch(`${STORE_API}/${storeId}`, {
+    if(!fileSha) await fetchViaApi();
+    const res = await fetch(API_URL, {
       method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name:'rulab-store', data:{items}})
+      headers:{'Authorization':'Bearer '+ghToken, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json'},
+      body: JSON.stringify({
+        message: 'Update inventory',
+        content: utf8ToBase64(JSON.stringify({items})),
+        sha: fileSha
+      })
     });
-    if(!res.ok) throw new Error('save failed');
+    if(res.status===409){
+      await fetchViaApi();
+      return saveItems();
+    }
+    if(!res.ok) throw new Error('save failed: '+res.status);
+    const json = await res.json();
+    fileSha = json.content.sha;
   }catch(e){
     setStatus('تعذّر رفع التحديث للسحابة، حاول مرة أخرى', true);
   }
@@ -384,17 +413,15 @@ function startPolling(){
   pollTimer = setInterval(async ()=>{
     if(document.hidden || confirmingDeleteId) return;
     try{
-      const res = await fetch(`${STORE_API}/${storeId}`);
-      if(!res.ok) return;
-      const obj = await res.json();
-      const fresh = JSON.stringify(Array.isArray(obj.data?.items) ? obj.data.items : []);
+      const data = ghToken ? await fetchViaApi() : await fetchViaRaw();
+      const fresh = JSON.stringify(Array.isArray(data.items) ? data.items : []);
       if(fresh !== JSON.stringify(items)){
         items = JSON.parse(fresh);
         localStorage.setItem(STORAGE_KEY, fresh);
         render();
       }
     }catch(e){ /* transient — next tick retries */ }
-  }, 5000);
+  }, 6000);
 }
 
 function daysUntil(dateStr){

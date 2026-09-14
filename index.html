@@ -5,117 +5,155 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مخزن المختبر">
-<meta name="theme-color" content="#2B3A5C">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='19' fill='%232B3A5C'/%3E%3Cpath d='M20 10v20M10 20h20' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%232B3A5C'/%3E%3Cpath d='M20 10v20M10 20h20' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
-<title>مخزن المختبر | تجمع حائل الصحي</title>
+<meta name="apple-mobile-web-app-title" content="RuLab">
+<meta name="theme-color" content="#1F4B43">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='7' fill='%231F4B43'/%3E%3Ctext x='6' y='12' font-family='monospace' font-size='6' fill='white' opacity='0.55'%3E44%3C/text%3E%3Ctext x='20' y='26' font-family='Arial,sans-serif' font-size='17' font-weight='700' fill='white' text-anchor='middle'%3ERu%3C/text%3E%3Ctext x='20' y='35' font-family='monospace' font-size='5' letter-spacing='1' fill='white' opacity='0.55' text-anchor='middle'%3ELAB%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%231F4B43'/%3E%3Ctext x='6' y='12' font-family='monospace' font-size='6' fill='white' opacity='0.55'%3E44%3C/text%3E%3Ctext x='20' y='26' font-family='Arial,sans-serif' font-size='17' font-weight='700' fill='white' text-anchor='middle'%3ERu%3C/text%3E%3Ctext x='20' y='35' font-family='monospace' font-size='5' letter-spacing='1' fill='white' opacity='0.55' text-anchor='middle'%3ELAB%3C/text%3E%3C/svg%3E">
+<title>RuLab — نظام مخزون المختبر</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#EEF0EA; --panel:#FBFAF6; --ink:#1E2A2A; --ink-soft:#5A6666;
-    --line:rgba(30,42,42,0.14); --line-strong:rgba(30,42,42,0.28);
-    --brand:#2B3A5C; --orange:#B23A3A; --orange-bg:#FBEAEA;
-    --red:#B23A3A; --red-bg:#FBEAEA; --green:#3E8368;
+    --paper:#EAEDE6; --surface:#FBFBF6; --ink:#17211D; --ink-dim:#5C6A63;
+    --line:rgba(23,33,29,0.13); --line-strong:rgba(23,33,29,0.26);
+    --brand:#1F4B43; --brand-dim:rgba(31,75,67,0.10);
+    --amber:#C97C2B; --amber-dim:rgba(201,124,43,0.12);
+    --red:#B33A3A; --red-bg:#FBEAEA;
     --yellow:#B8930C; --yellow-bg:#FBF6DE;
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans Arabic',sans-serif;line-height:1.55;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans Arabic',sans-serif;line-height:1.6;}
   .mono{font-family:'IBM Plex Mono',monospace;}
   button{font-family:inherit;cursor:pointer;}
+  button:focus-visible, input:focus-visible, select:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 
-  header{padding:16px 20px 18px;border-bottom:1px solid var(--line-strong);background:rgba(255,255,255,.5);}
+  header{position:relative;padding:16px 20px 18px;background:rgba(255,255,255,.55);}
+  header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--accent, var(--brand));transition:background .4s ease;}
   .hdr-inner{max-width:1140px;margin:0 auto;}
-  h1{font-size:20px;margin:0 0 14px;font-weight:700;color:var(--ink-soft);}
 
-  .logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-  .logo-badge{flex:none;width:38px;height:38px;border-radius:10px;background:var(--brand);display:flex;align-items:center;justify-content:center;}
-  .logo-text{line-height:1.3;}
-  .logo-org{font-size:16px;font-weight:700;color:var(--ink);}
-  .logo-sub{font-size:11px;color:var(--ink-soft);letter-spacing:.2px;}
-  .share-btn{margin-inline-start:auto;font-size:11.5px;font-weight:600;color:#fff;background:var(--green);border:none;border-radius:20px;padding:6px 14px;flex:none;display:flex;align-items:center;gap:5px;}
-  .share-btn:hover{opacity:.9;}
+  .brand-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .tile{position:relative;width:42px;height:42px;border-radius:8px;background:var(--brand);overflow:hidden;flex:none;box-shadow:0 3px 8px rgba(31,75,67,.32);}
+  .tile-liquid{position:absolute;left:0;right:0;bottom:0;height:0%;background:linear-gradient(180deg, rgba(201,124,43,.5), rgba(201,124,43,.85));}
+  .tile-num{position:absolute;top:3px;inset-inline-start:5px;font-family:'IBM Plex Mono',monospace;font-size:8px;color:rgba(255,255,255,.6);}
+  .tile-sym{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;letter-spacing:-.5px;}
+  .tile-cap{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:6px;letter-spacing:1.5px;color:rgba(255,255,255,.55);}
+  @media (prefers-reduced-motion: no-preference){
+    .tile-liquid{animation:fillUp 1.1s cubic-bezier(.22,1,.36,1) .2s forwards;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .tile-liquid{height:58%;}
+  }
+  @keyframes fillUp{ from{height:0%;} to{height:58%;} }
+
+  .wordmark{line-height:1.25;}
+  .word{font-size:19px;font-weight:700;letter-spacing:-.2px;}
+  .word-ru{color:var(--amber);}
+  .word-lab{color:var(--ink);}
+  .word-sub{font-size:11.5px;color:var(--ink-dim);margin-top:1px;}
 
   .dept-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;-webkit-overflow-scrolling:touch;}
-  .dept-chip{display:flex;align-items:center;gap:7px;white-space:nowrap;border:1px solid var(--line-strong);background:#fff;border-radius:20px;padding:7px 14px;font-size:13px;color:var(--ink-soft);flex:none;}
-  .dept-chip .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .dept-chip{display:flex;align-items:center;gap:7px;white-space:nowrap;border:1px solid var(--line-strong);background:#fff;border-radius:20px;padding:7px 14px;font-size:13px;color:var(--ink-dim);flex:none;transition:background .22s ease, color .22s ease, border-color .22s ease, transform .15s ease;}
+  .dept-chip:active{transform:scale(.96);}
+  .dept-chip .dot{width:8px;height:8px;border-radius:50%;flex:none;transition:background .22s ease;}
   .dept-chip.active{background:var(--dept-color,var(--brand));color:#fff;border-color:var(--dept-color,var(--brand));}
   .dept-chip.active .dot{background:#fff;}
 
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px;}
-  .tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--line-strong);border-radius:8px;padding:3px;}
-  .tab{border:none;background:none;padding:8px 18px;border-radius:6px;font-size:14px;color:var(--ink-soft);font-weight:500;}
-  .tab.active{background:var(--brand);color:#fff;}
+  .tabs{position:relative;display:flex;gap:4px;background:#fff;border:1px solid var(--line-strong);border-radius:9px;padding:3px;}
+  .tab-indicator{position:absolute;top:3px;bottom:3px;left:0;width:0;border-radius:6px;background:var(--brand);transition:transform .32s cubic-bezier(.65,0,.35,1), width .32s cubic-bezier(.65,0,.35,1);z-index:0;}
+  .tab{position:relative;z-index:1;border:none;background:none;padding:8px 18px;border-radius:6px;font-size:14px;color:var(--ink-dim);font-weight:600;transition:color .25s ease;}
+  .tab.active{color:#fff;}
   .search{flex:1;min-width:140px;}
-  .search input{width:100%;padding:9px 12px;border:1px solid var(--line-strong);border-radius:8px;font-family:inherit;font-size:14px;background:#fff;}
-  .btn-add{background:var(--brand);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;flex:none;white-space:nowrap;}
-  .btn-add:hover{opacity:.9;}
+  .search input{width:100%;padding:9px 12px;border:1px solid var(--line-strong);border-radius:8px;font-family:inherit;font-size:14px;background:#fff;transition:border-color .2s ease;}
+  .search input:focus-visible{border-color:var(--amber);}
+  .btn-add{background:var(--amber);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;flex:none;white-space:nowrap;transition:transform .15s ease, box-shadow .2s ease;}
+  .btn-add:hover{box-shadow:0 4px 10px var(--amber-dim);transform:translateY(-1px);}
+  .btn-add:active{transform:translateY(0) scale(.97);}
 
   .alert-strip{max-width:1140px;margin:14px auto 0;padding:0 20px;position:relative;}
   .alert-row{display:flex;gap:10px;align-items:stretch;}
   .notif-wrap{position:relative;flex:1;}
-  .btn-notif{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;font-size:14px;font-weight:600;color:var(--ink);}
+  .btn-notif{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;font-size:14px;font-weight:600;color:var(--ink);transition:transform .15s ease, box-shadow .2s ease;}
+  .btn-notif:hover{box-shadow:0 4px 10px rgba(23,33,29,.08);transform:translateY(-1px);}
   .notif-badge{background:var(--red);color:#fff;font-size:11px;padding:1px 8px;border-radius:20px;line-height:1.5;}
-  .notif-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;left:0;background:#fff;border:1px solid var(--line-strong);border-radius:8px;padding:12px 14px;max-height:380px;overflow-y:auto;z-index:40;box-shadow:0 8px 20px rgba(20,25,25,.12);}
-  .notif-panel.show{display:block;}
+  .notif-panel{position:absolute;top:calc(100% + 8px);right:0;left:0;background:#fff;border:1px solid var(--line-strong);border-radius:8px;padding:12px 14px;max-height:380px;overflow-y:auto;z-index:40;box-shadow:0 10px 24px rgba(20,25,25,.14);
+    opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-6px);transition:opacity .2s ease, transform .2s ease, visibility .2s;}
+  .notif-panel.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0);}
   .notif-dept{margin-bottom:14px;}
   .notif-dept:last-child{margin-bottom:0;}
   .notif-dept-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:6px;}
   .notif-dept-title .dot{width:8px;height:8px;border-radius:50%;flex:none;}
   .notif-item-row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;padding:6px 0;border-top:1px solid var(--line);}
-  .notif-empty{font-size:13px;color:var(--ink-soft);text-align:center;padding:18px 0;}
+  .notif-empty{font-size:13px;color:var(--ink-dim);text-align:center;padding:18px 0;}
 
   main{max-width:1140px;margin:0 auto;padding:18px 20px 80px;}
-  #status-msg{font-size:12.5px;color:var(--ink-soft);min-height:18px;margin-bottom:6px;}
-  .current-dept-label{font-size:13px;color:var(--ink-soft);margin-bottom:10px;}
+  #status-msg{font-size:12.5px;color:var(--ink-dim);min-height:20px;margin-bottom:6px;opacity:0;transform:translateY(-4px);transition:opacity .25s ease, transform .25s ease;}
+  #status-msg.show{opacity:1;transform:translateY(0);}
+  .current-dept-label{font-size:13px;color:var(--ink-dim);margin-bottom:10px;}
   .current-dept-label b{color:var(--ink);}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative;border-inline-start:4px solid var(--line-strong);}
-  .card.orange{border-inline-start-color:var(--orange);}
-  .card.expiry{border-inline-start-color:var(--yellow);}
-  .card-photo{width:100%;height:72px;background:#e4e4dc center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:10.5px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative;box-shadow:0 1px 3px rgba(23,33,29,.07);
+    opacity:0;transform:translateY(10px);animation:cardIn .4s cubic-bezier(.22,1,.36,1) forwards;animation-delay:calc(var(--i,0) * 40ms);}
+  @media (prefers-reduced-motion: reduce){ .card{opacity:1;transform:none;animation:none;} }
+  @keyframes cardIn{ from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+  .card-cap{height:7px;background:var(--dept-color,var(--brand));}
+  .card-photo{width:100%;height:70px;background:#E7E9E0 center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.55;}
   .card-body{padding:9px 10px 10px;}
   .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;flex-wrap:wrap;}
   .card-name{font-size:13.5px;font-weight:600;margin:0;}
-  .card-lot{font-size:10px;color:var(--ink-soft);margin-top:2px;}
-  .badge{font-size:10px;padding:2px 7px;border-radius:20px;white-space:nowrap;}
-  .badge.orange{background:var(--orange-bg);color:var(--orange);}
-  .badge.expiry{background:var(--yellow-bg);color:var(--yellow);}
-  .card-exp{font-size:10.5px;color:var(--ink-soft);margin-top:6px;}
+  .card-lot{font-size:10px;color:var(--ink-dim);margin-top:2px;}
+  .tag{position:absolute;top:7px;inset-inline-end:0;font-size:9.5px;font-weight:700;letter-spacing:.1px;color:#fff;padding:4px 10px;border-start-end-radius:0;border-end-start-radius:10px;border-start-start-radius:10px;border-end-end-radius:0;}
+  .tag.orange{background:var(--red);}
+  .tag.expiry{background:var(--yellow);}
+  .card-exp{font-size:10.5px;color:var(--ink-dim);margin-top:6px;}
   .qty-row{display:flex;align-items:center;gap:6px;margin-top:9px;}
-  .qty-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--line-strong);background:#fff;font-size:14px;line-height:1;}
+  .qty-btn{width:27px;height:27px;border-radius:6px;border:1px solid var(--line-strong);background:#fff;font-size:14px;line-height:1;transition:transform .12s ease, background .2s ease;}
+  .qty-btn:hover{background:var(--brand-dim);}
+  .qty-btn:active{transform:scale(.88);}
   .qty-val{flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;border:1px solid var(--line-strong);border-radius:6px;padding:4px 0;background:#fff;}
+  .qty-val.pulse{animation:pulseVal .35s ease;}
+  @keyframes pulseVal{ 0%{transform:scale(1);} 45%{transform:scale(1.18);color:var(--amber);} 100%{transform:scale(1);} }
   .card-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}
-  .icon-btn{background:none;border:none;color:var(--ink-soft);font-size:11px;text-decoration:underline;padding:2px;}
+  .icon-btn{background:none;border:none;color:var(--ink-dim);font-size:11px;text-decoration:underline;padding:2px;transition:color .15s ease;}
+  .icon-btn:hover{color:var(--ink);}
   .icon-btn.danger{color:var(--red);}
 
-  .empty{color:var(--ink-soft);font-size:14px;padding:40px 0;text-align:center;}
+  .empty{color:var(--ink-dim);font-size:14px;padding:40px 0;text-align:center;animation:fadeIn .3s ease;}
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
 
-  .overlay{position:fixed;inset:0;background:rgba(20,25,25,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;}
-  .overlay.show{display:flex;}
-  .modal{background:#fff;border-radius:10px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;padding:22px;}
+  .overlay{position:fixed;inset:0;background:rgba(20,25,25,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50;
+    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease, visibility .22s;}
+  .overlay.show{opacity:1;visibility:visible;pointer-events:auto;}
+  .modal{background:#fff;border-radius:12px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;padding:22px;
+    transform:scale(.94) translateY(8px);opacity:0;transition:transform .3s cubic-bezier(.34,1.4,.64,1), opacity .22s ease;}
+  .overlay.show .modal{transform:scale(1) translateY(0);opacity:1;}
   .modal h2{font-size:18px;margin:0 0 16px;}
   .field{margin-bottom:14px;}
-  .field label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:5px;}
-  .field input, .field select{width:100%;padding:9px 10px;border:1px solid var(--line-strong);border-radius:6px;font-family:inherit;font-size:14px;background:#fff;}
+  .field label{display:block;font-size:13px;color:var(--ink-dim);margin-bottom:5px;}
+  .field input, .field select{width:100%;padding:9px 10px;border:1px solid var(--line-strong);border-radius:6px;font-family:inherit;font-size:14px;background:#fff;transition:border-color .2s ease;}
+  .field input:focus-visible, .field select:focus-visible{border-color:var(--amber);}
   .photo-input-row{display:flex;align-items:center;gap:12px;}
   .photo-preview{width:64px;height:64px;border-radius:6px;background:#eee center/cover no-repeat;flex:none;border:1px solid var(--line-strong);}
   .modal-actions{display:flex;gap:10px;margin-top:18px;}
-  .btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line-strong);background:#fff;font-size:14px;font-weight:600;}
-  .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand);}
-  .btn.ghost{color:var(--ink-soft);}
+  .btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line-strong);background:#fff;font-size:14px;font-weight:600;transition:transform .15s ease, box-shadow .2s ease;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--amber);color:#fff;border-color:var(--amber);}
+  .btn.primary:hover{box-shadow:0 4px 10px var(--amber-dim);}
+  .btn.ghost{color:var(--ink-dim);}
 
   footer{max-width:1140px;margin:0 auto;padding:10px 20px 40px;text-align:center;}
-  .reset-link{font-size:11.5px;color:var(--ink-soft);text-decoration:underline;background:none;border:none;}
+  .reset-link{font-size:11.5px;color:var(--ink-dim);text-decoration:underline;background:none;border:none;transition:color .15s ease;}
+  .reset-link:hover{color:var(--red);}
 
   @media (max-width:600px){
     .toolbar{flex-direction:column;align-items:stretch;}
     .tabs{justify-content:center;}
     .btn-notif, .btn-add{padding:9px 10px;font-size:13px;}
-    .logo-row{flex-wrap:wrap;}
-    .share-btn{margin-inline-start:0;flex:1 0 100%;justify-content:center;order:3;margin-top:4px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
   }
 </style>
 </head>
@@ -123,22 +161,22 @@
 
 <header>
   <div class="hdr-inner">
-    <div class="logo-row">
-      <div class="logo-badge">
-        <svg width="22" height="22" viewBox="0 0 40 40" aria-hidden="true">
-          <path d="M20 10v20M10 20h20" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-        </svg>
+    <div class="brand-row">
+      <div class="tile" id="brandTile">
+        <span class="tile-liquid" aria-hidden="true"></span>
+        <span class="tile-num">44</span>
+        <span class="tile-sym">Ru</span>
+        <span class="tile-cap">LAB</span>
       </div>
-      <div class="logo-text">
-        <div class="logo-org">تجمع حائل الصحي</div>
-        <div class="logo-sub">نظام مخزون المختبر — نموذج تجريبي</div>
+      <div class="wordmark">
+        <div class="word"><span class="word-ru">Ru</span><span class="word-lab">Lab</span></div>
+        <div class="word-sub">نظام مخزون المختبر</div>
       </div>
-      <button class="share-btn" id="shareBtn">🔗 نسخ رابط المشاركة</button>
     </div>
-    <h1>مخزن المختبر</h1>
     <div class="dept-row" id="deptRow"></div>
     <div class="toolbar">
-      <div class="tabs">
+      <div class="tabs" id="tabs">
+        <span class="tab-indicator" id="tabIndicator"></span>
         <button class="tab active" data-type="reagents">محاليل (Reagents)</button>
         <button class="tab" data-type="equipment">أدوات (Equipment)</button>
       </div>
@@ -240,6 +278,7 @@ const overlay = document.getElementById('overlay');
 const searchInput = document.getElementById('searchInput');
 const deptRow = document.getElementById('deptRow');
 const deptLabel = document.getElementById('deptLabel');
+const headerEl = document.querySelector('header');
 
 function deptById(id){ return DEPARTMENTS.find(d=>d.id===id); }
 
@@ -252,8 +291,14 @@ let cloudReady = false;
 
 function setStatus(msg, isErr){
   statusMsg.textContent = msg || '';
-  statusMsg.style.color = isErr ? 'var(--red)' : 'var(--ink-soft)';
-  if(msg) setTimeout(()=>{ if(statusMsg.textContent===msg) statusMsg.textContent=''; }, 3000);
+  statusMsg.style.color = isErr ? 'var(--red)' : 'var(--ink-dim)';
+  statusMsg.classList.toggle('show', !!msg);
+  if(msg) setTimeout(()=>{
+    if(statusMsg.textContent===msg){
+      statusMsg.classList.remove('show');
+      setTimeout(()=>{ if(!statusMsg.classList.contains('show')) statusMsg.textContent=''; }, 250);
+    }
+  }, 3000);
 }
 
 async function ensureStore(){
@@ -336,16 +381,6 @@ function startPolling(){
   }, 5000);
 }
 
-document.getElementById('shareBtn').addEventListener('click', async ()=>{
-  await ensureStore();
-  try{
-    await navigator.clipboard.writeText(location.href);
-    setStatus('تم نسخ رابط المشاركة ✓');
-  }catch(e){
-    setStatus(location.href);
-  }
-});
-
 function daysUntil(dateStr){
   const today = new Date(); today.setHours(0,0,0,0);
   const d = new Date(dateStr); d.setHours(0,0,0,0);
@@ -379,6 +414,7 @@ function renderDeptRow(){
 function render(){
   renderDeptRow();
   const dept = deptById(activeDept);
+  headerEl.style.setProperty('--accent', dept.color);
   deptLabel.innerHTML = `قسم <b>${dept.name}</b> — ${activeType==='reagents' ? 'المحاليل' : 'الأدوات'}`;
 
   const q = searchInput.value.trim().toLowerCase();
@@ -395,18 +431,19 @@ function render(){
     return;
   }
 
-  grid.innerHTML = filtered.map(it=>{
+  grid.innerHTML = filtered.map((it,idx)=>{
     const s = getStatus(it);
     return `
-    <div class="card ${s.level}" data-id="${it.id}">
-      <div class="card-photo" style="${it.photo ? `background-image:url('${it.photo}')` : ''}">${it.photo?'':'لا توجد صورة'}</div>
+    <div class="card" data-id="${it.id}" style="--dept-color:${dept.color};--i:${idx}">
+      ${s.label ? `<span class="tag ${s.level}">${s.label}</span>` : ''}
+      <div class="card-cap"></div>
+      <div class="card-photo" style="${it.photo ? `background-image:url('${it.photo}')` : ''}">${it.photo?'':'🧪'}</div>
       <div class="card-body">
         <div class="card-top">
           <div>
             <p class="card-name">${escapeHtml(it.name)}</p>
             <div class="card-lot mono">${it.lot ? 'اللوت: '+escapeHtml(it.lot) : 'بدون رقم لوت'}</div>
           </div>
-          ${s.label ? `<span class="badge ${s.level}">${s.label}</span>` : ''}
         </div>
         ${it.expiry ? `<div class="card-exp">تاريخ الانتهاء: ${it.expiry}</div>` : ''}
         <div class="qty-row">
@@ -423,6 +460,27 @@ function render(){
       </div>
     </div>`;
   }).join('');
+
+  positionTabIndicator();
+}
+
+function pulseQty(id){
+  const el = grid.querySelector(`.card[data-id="${id}"] .qty-val`);
+  if(!el) return;
+  el.classList.remove('pulse');
+  void el.offsetWidth;
+  el.classList.add('pulse');
+}
+
+function positionTabIndicator(){
+  const tabs = document.getElementById('tabs');
+  const indicator = document.getElementById('tabIndicator');
+  const active = tabs.querySelector('.tab.active');
+  if(!active) return;
+  const tabsRect = tabs.getBoundingClientRect();
+  const activeRect = active.getBoundingClientRect();
+  indicator.style.width = activeRect.width + 'px';
+  indicator.style.transform = `translateX(${activeRect.left - tabsRect.left}px)`;
 }
 
 function renderNotifPanel(){
@@ -440,7 +498,7 @@ function renderNotifPanel(){
       <div class="notif-dept-title"><span class="dot" style="background:${dept.color}"></span>${dept.name}</div>
       ${deptAlerts.length===0
         ? `<div class="notif-empty">لا توجد تنبيهات في قسم ${dept.name} حاليًا</div>`
-        : deptAlerts.map(a=>`<div class="notif-item-row"><span>${escapeHtml(a.it.name)} <span style="color:var(--ink-soft)">(${typeLabel(a.it.type)})</span></span><span class="badge ${a.s.level}">${a.s.label}</span></div>`).join('')
+        : deptAlerts.map(a=>`<div class="notif-item-row"><span>${escapeHtml(a.it.name)} <span style="color:var(--ink-dim)">(${typeLabel(a.it.type)})</span></span><span class="badge" style="color:${a.s.level==='expiry'?'var(--yellow)':'var(--red)'};font-weight:700;font-size:10px;">${a.s.label}</span></div>`).join('')
       }
     </div>`;
   if(deptAlerts.length>0){ badge.style.display='inline-block'; badge.textContent = deptAlerts.length; }
@@ -464,8 +522,8 @@ grid.addEventListener('click', async (e)=>{
   const id = card.dataset.id;
   const item = items.find(i=>i.id===id);
   const act = e.target.dataset.act;
-  if(act==='inc'){ item.quantity++; render(); await saveItems(); }
-  else if(act==='dec'){ item.quantity = Math.max(0, item.quantity-1); render(); await saveItems(); }
+  if(act==='inc'){ item.quantity++; render(); pulseQty(id); await saveItems(); }
+  else if(act==='dec'){ item.quantity = Math.max(0, item.quantity-1); render(); pulseQty(id); await saveItems(); }
   else if(act==='del'){
     confirmingDeleteId = id;
     render();
@@ -487,10 +545,12 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     activeType = t.dataset.type;
+    positionTabIndicator();
     render();
   });
 });
 searchInput.addEventListener('input', render);
+window.addEventListener('resize', positionTabIndicator);
 
 document.getElementById('openAdd').addEventListener('click', ()=> openModal(null));
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
@@ -597,6 +657,7 @@ document.getElementById('resetBtn').addEventListener('click', async (e)=>{
 });
 
 loadItems();
+window.addEventListener('load', positionTabIndicator);
 </script>
 </body>
 </html>

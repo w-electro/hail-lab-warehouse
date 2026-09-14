@@ -125,6 +125,15 @@
   .overlay{position:fixed;inset:0;background:rgba(20,25,25,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50;
     opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease, visibility .22s;}
   .overlay.show{opacity:1;visibility:visible;pointer-events:auto;}
+
+  .lightbox{position:fixed;inset:0;background:rgba(10,14,12,.84);display:flex;align-items:center;justify-content:center;padding:24px;z-index:60;
+    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease, visibility .22s;}
+  .lightbox.show{opacity:1;visibility:visible;pointer-events:auto;}
+  .lightbox img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 20px 50px rgba(0,0,0,.4);
+    transform:scale(.94);transition:transform .3s cubic-bezier(.34,1.4,.64,1);}
+  .lightbox.show img{transform:scale(1);}
+  .lightbox-close{position:absolute;top:16px;inset-inline-end:18px;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:18px;line-height:1;}
+  .lightbox-close:hover{background:rgba(255,255,255,.28);}
   .modal{background:#fff;border-radius:12px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;padding:22px;
     transform:scale(.94) translateY(8px);opacity:0;transition:transform .3s cubic-bezier(.34,1.4,.64,1), opacity .22s ease;}
   .overlay.show .modal{transform:scale(1) translateY(0);opacity:1;}
@@ -253,6 +262,11 @@
   </div>
 </div>
 
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">✕</button>
+  <img id="lightboxImg" alt="صورة الغرض">
+</div>
+
 <script>
 const STORAGE_KEY = 'inventory-data';
 let items = [];
@@ -266,6 +280,7 @@ const DEPARTMENTS = [
   {id:'chemistry',    name:'Chemistry',      color:'#C99A2E'},
   {id:'hormone',      name:'Hormone',        color:'#8B6BA8'},
   {id:'bloodbank',    name:'Blood Bank',     color:'#D65C7D'},
+  {id:'hematology',   name:'Hematology',     color:'#7A2E4D'},
   {id:'virology',     name:'Virology',       color:'#A8353A'},
   {id:'serology',     name:'Serology',       color:'#4A90A4'},
   {id:'microbiology', name:'Microbiology',   color:'#3E8368'},
@@ -282,10 +297,10 @@ const headerEl = document.querySelector('header');
 
 function deptById(id){ return DEPARTMENTS.find(d=>d.id===id); }
 
-// بيانات مشتركة سحابيًا عبر jsonblob.com: كل من يفتح نفس الرابط (بنفس ?store=) يرى نفس المخزون
+// بيانات مشتركة سحابيًا عبر restful-api.dev: كل من يفتح نفس الرابط (بنفس ?store=) يرى نفس المخزون
 // ويقدر يضيف/يعدّل. أول من يفتح الرابط الأساسي (بدون store) ينشئ مخزنًا جديدًا تلقائيًا،
 // ويتحدث الرابط في المتصفح بمعرّف المخزن — هذا الرابط الجديد هو الي ينرسل للباقين.
-const JSONBLOB_BASE = 'https://jsonblob.com/api/jsonBlob';
+const STORE_API = 'https://api.restful-api.dev/objects';
 let storeId = new URLSearchParams(location.search).get('store');
 let cloudReady = false;
 
@@ -304,14 +319,15 @@ function setStatus(msg, isErr){
 async function ensureStore(){
   if(storeId) return true;
   try{
-    const res = await fetch(JSONBLOB_BASE, {
+    const res = await fetch(STORE_API, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({items:[]})
+      body: JSON.stringify({name:'rulab-store', data:{items:[]}})
     });
-    const loc = res.headers.get('Location');
-    if(!loc) throw new Error('no id returned');
-    storeId = loc.split('/').pop();
+    if(!res.ok) throw new Error('create failed');
+    const created = await res.json();
+    if(!created.id) throw new Error('no id returned');
+    storeId = created.id;
     const url = new URL(location.href);
     url.searchParams.set('store', storeId);
     history.replaceState(null, '', url);
@@ -328,10 +344,10 @@ async function loadItems(){
   cloudReady = ok;
   if(ok){
     try{
-      const res = await fetch(`${JSONBLOB_BASE}/${storeId}`);
+      const res = await fetch(`${STORE_API}/${storeId}`);
       if(!res.ok) throw new Error('fetch failed');
-      const data = await res.json();
-      items = Array.isArray(data.items) ? data.items : [];
+      const obj = await res.json();
+      items = Array.isArray(obj.data?.items) ? obj.data.items : [];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
       setStatus('');
     }catch(e){
@@ -351,10 +367,10 @@ async function saveItems(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   if(!cloudReady) return;
   try{
-    const res = await fetch(`${JSONBLOB_BASE}/${storeId}`, {
+    const res = await fetch(`${STORE_API}/${storeId}`, {
       method:'PUT',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({items})
+      body: JSON.stringify({name:'rulab-store', data:{items}})
     });
     if(!res.ok) throw new Error('save failed');
   }catch(e){
@@ -368,10 +384,10 @@ function startPolling(){
   pollTimer = setInterval(async ()=>{
     if(document.hidden || confirmingDeleteId) return;
     try{
-      const res = await fetch(`${JSONBLOB_BASE}/${storeId}`);
+      const res = await fetch(`${STORE_API}/${storeId}`);
       if(!res.ok) return;
-      const data = await res.json();
-      const fresh = JSON.stringify(Array.isArray(data.items)?data.items:[]);
+      const obj = await res.json();
+      const fresh = JSON.stringify(Array.isArray(obj.data?.items) ? obj.data.items : []);
       if(fresh !== JSON.stringify(items)){
         items = JSON.parse(fresh);
         localStorage.setItem(STORAGE_KEY, fresh);
@@ -437,7 +453,7 @@ function render(){
     <div class="card" data-id="${it.id}" style="--dept-color:${dept.color};--i:${idx}">
       ${s.label ? `<span class="tag ${s.level}">${s.label}</span>` : ''}
       <div class="card-cap"></div>
-      <div class="card-photo" style="${it.photo ? `background-image:url('${it.photo}')` : ''}">${it.photo?'':'🧪'}</div>
+      <div class="card-photo" data-act="${it.photo ? 'view-photo' : ''}" style="${it.photo ? `background-image:url('${it.photo}');cursor:pointer` : ''}">${it.photo?'':'🧪'}</div>
       <div class="card-body">
         <div class="card-top">
           <div>
@@ -522,7 +538,8 @@ grid.addEventListener('click', async (e)=>{
   const id = card.dataset.id;
   const item = items.find(i=>i.id===id);
   const act = e.target.dataset.act;
-  if(act==='inc'){ item.quantity++; render(); pulseQty(id); await saveItems(); }
+  if(act==='view-photo'){ openLightbox(item.photo); }
+  else if(act==='inc'){ item.quantity++; render(); pulseQty(id); await saveItems(); }
   else if(act==='dec'){ item.quantity = Math.max(0, item.quantity-1); render(); pulseQty(id); await saveItems(); }
   else if(act==='del'){
     confirmingDeleteId = id;
@@ -576,6 +593,17 @@ function openModal(item){
   overlay.classList.add('show');
 }
 function closeModal(){ overlay.classList.remove('show'); }
+
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+function openLightbox(src){
+  lightboxImg.src = src;
+  lightbox.classList.add('show');
+}
+function closeLightbox(){ lightbox.classList.remove('show'); }
+document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', (e)=>{ if(e.target===lightbox) closeLightbox(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeLightbox(); });
 
 document.getElementById('photoInput').addEventListener('change', async (e)=>{
   const file = e.target.files[0];
